@@ -1,0 +1,37 @@
+{
+    "name": "@realdem/react-user-pref",
+    "version": "2023.1.3.0",
+    "private": false,
+    "license": "MIT",
+    "description": "A react hook to persist user preferences in their browser",
+    "keywords": [
+        "user",
+        "preferences",
+        "settings",
+        "persist",
+        "localStorage",
+        "tools"
+    ],
+    "homepage": "https://www.github.com/realdem/react-user-pref",
+    "author": {
+        "name": "Dan Michael",
+        "email": "dan@danmichael.consulting",
+        "url": "https://danmichael.pro"
+    },
+    "main": "react-user-pref.js",
+    "dependencies": {
+        "react": "^18.2.0"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 3 chrome version",
+            "last 3 firefox version",
+            "last 3 safari version"
+        ]
+    }
+}
