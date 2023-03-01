@@ -1,35 +1,89 @@
 /**
  * "react-user-pref"
- * Version: 0.5.0
  * License: MIT
- * Author: Dan Michael <dan@danmichael.consulting>, started early 2022
+ * Author: Dan Michael <dan@danmichael.consulting>, started early 2023
  * 
- * Requirements: For ReactJS running in web browsers, with zero dependencies
- * 
- * Use this to persist user preferences in their browser.
- * 
+ * About: Use this to persist user preferences in their browser.
  * Thank you for using this!
  * 
  * 
  * Steps to use:
  * 1. --
+ * 
+ * Guidelines:
+ * 1. Not intended for data caching
+ * 
+ * Remaining build tasks:
+ * 1. validateLocalPreferences (?)
+ * 2. Complete getLocalPreference
+ * 3. Finish comments
+ * 4. Fully test everything
  */
-const packageName = 'react-user-pref'
+import {
+    version as packageVersion,
+    name as packageName
+} from './package.json' assert {type: 'json'}
 
+
+/**Initialize defaults */
+const defaultUserId = 0
+const defaultPreferenceValue = null
+
+
+/**Revive specific values from the save */
+function parseReviver(key, value) {
+    switch (key) {
+        case 'unix': return Number(value)
+        default: return value;
+    }
+}
+
+/**Retrieve the entire local save */
 export const getLocal = () => {
+    /**Check localStorage availability */
+    if (!isLocalStorageAvailable()) {
+        emitErrorLocalStorage()
+        return false
+    }
     let localRaw = localStorage.getItem(packageName)
     let local = null
-    if (localRaw) local = JSON.parse(localRaw)
-    return !localRaw || !local ? null
-        : local
+    if (localRaw) local = JSON.parse(localRaw, parseReviver)
+    return !localRaw || !local? null : local
 }
 
-export const initializeLocalPreferences = userId => {
+/**Initialize preferences for this user */
+export const initializeLocalPreferences = (userId = defaultUserId) => {
+    /**Check localStorage availability */
+    if (!isLocalStorageAvailable()) {
+        emitErrorLocalStorage()
+        return false
+    }
     let local = getLocal()
-    if (!local) return localStorage.setItem(packageName, JSON.stringify(defaultLocalPreferences(userId)))
+    if (!local) {
+        localStorage.setItem(packageName, JSON.stringify(defaultLocalPreferences(userId)))
+        return true
+    }
 }
 
-export const getLocalPreference = code => {
+/**Retrieve all preferences */
+export const getLocalPreferences = (
+    userId = defaultUserId,
+    returnObject = false
+) => {
+    let local = getLocal().find(userSave => userSave.meta.userId === userId)
+    if (!returnObject) return local.preferences
+    else local.preferences.reduce((result, userPref) => {
+        result[userPref.code] = value
+        return result
+    }, {})
+}
+//
+/**Retrieve a specfifc value by preference */
+export const getLocalPreference = (
+    code = undefined,
+    defaultValue = defaultPreferenceValue,
+    userId = defaultUserId
+) => {
     // if (!validateLocalPreferences()) {
     //   initializeLocalPreferences(null)
     //   return null
@@ -40,7 +94,17 @@ export const getLocalPreference = code => {
         : local.preferences.length < 1 ? null : !preference ? null : preference.value
 }
 
-export const setLocalPreference = (userId, code, value) => {
+/**Set a preference's value */
+export const setLocalPreference = (
+    code = undefined,
+    value = defaultPreferenceValue,
+    userId = defaultUserId
+) => {
+    /**Check localStorage availability */
+    if (!isLocalStorageAvailable()) {
+        emitErrorLocalStorage()
+        return false
+    }
     let local = getLocal()
     if (!local) local = defaultLocalPreferences(userId)
     let prevPreferences = local.preferences
@@ -51,8 +115,10 @@ export const setLocalPreference = (userId, code, value) => {
     else setPreferences.push(setItem)
     let setLocal = { ...local, preferences: setPreferences }
     localStorage.setItem(packageName, JSON.stringify(setLocal))
+    return true
 }
 
+/**REMINDER: What does this do? */
 export const validateLocalPreferences = () => {
     let local = getLocal()
     return !(
@@ -62,22 +128,47 @@ export const validateLocalPreferences = () => {
     )
 }
 
-export const defaultLocalPreferences = id => ({
-    meta: {
-        userId: id,
-        time: + new Date()/1000,
-        version: 0.9
-    },
-    preferences: [
-        // {
-        //     code: 'appFeatures',
-        //     value: {
-        //         darkMode: null
-        //     }
-        // },
-        // {
-        //     code: 'darkMode',
-        //     value: null
-        // }
-    ]
-})
+/**REMINDER: What does this do? */
+const defaultLocalPreferences = (userId = defaultUserId) => {
+    let time = new Date()
+    return {
+        meta: {
+            userId,
+            code: packageName+':metadata',
+            time: {
+                unix: time/1000,
+                iso: time.toISOString(),
+                string: time.toISOString()
+            },
+            version: packageVersion
+        },
+        preferences: [
+            // {
+            //     code: 'darkMode',
+            //     value: true
+            // }
+        ]
+    }
+}
+
+/**This function consoles an error */
+const emitErrorLocalStorage = () => console.error(packageName+': Local Storage is not available.')
+
+/**Check the browser permissions and/or capability for localStorage */
+function isLocalStorageAvailable() {
+    if (typeof localStorage !== undefined)
+        try {
+            localStorage.setItem(packageName+':test', 'here')
+            if (localStorage.getItem(packageName+':test') === 'here') {
+                localStorage.removeItem(packageName+':test')
+                /* localStorage is enabled */
+                return true
+            } else /* localStorage is disabled */
+                return false
+        } catch(e) {
+            /* localStorage is disabled */
+            return false
+        }
+    else /* localStorage is not available */
+        return false
+}
