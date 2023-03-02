@@ -16,7 +16,7 @@
  * Remaining build tasks:
  * 1. validateLocalPreferences (?)
  * 2. Complete getLocalPreference
- * 3. Create React hook useUserPref({code, userId})
+ * 3. Complete React hook useUserPref({code, userId})
  * 4. Finish comments
  * 5. Fully test everything
  */
@@ -91,9 +91,9 @@ export const getLocalPreference = (
     //   return null
     // }
     let local = getLocal()
-    let preference = !local ? null : local.preferences.find(pref => pref.code === code)
-    return !local ? null
-        : local.preferences.length < 1 ? null : !preference ? null : preference.value
+    let preference = !local ? defaultValue : local.preferences.find(pref => pref.code === code)
+    return !local ? defaultValue
+        : local.preferences.length < 1 ? defaultValue : !preference ? defaultValue : preference.value
 }
 
 /**Set a preference's value */
@@ -186,8 +186,9 @@ export const useUserPref = (options = {}) => {
     let param = {...useUserPrefDefaultOptions, ...isObject(options)? options : {}}
 
     /**Determine what to return */
-    let result = undefined
-    /**REMINDER: Finish here */
+    return !!param.code? 
+        getLocalPreference(param.code, defaultPreferenceValue, param.userId)
+        : getLocalPreferences(param.userId, true)
 }
 
 
