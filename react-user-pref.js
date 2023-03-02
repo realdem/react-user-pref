@@ -13,18 +13,18 @@
  * Guidelines:
  * 1. Not intended for data caching
  * 
- * Remaining build tasks:
- * 1. validateLocalPreferences (?)
- * 2. Complete getLocalPreference
- * 4. Finish comments
- * 5. Fully test everything
- * 6. Shorten "preference" function names to "pref"?
- * 7. Finish "Steps to use" (above)
+ * Remaining build tasks (in order):
+ * validateLocalPreferences (?)
+ * Complete getLocalPreference
+ * Add localPackageStorageObject()
+ * Finish comments
+ * Fully test everything
+ * Shorten "preference" function names to "pref"?
+ * Finish "Steps to use" (above)
  */
-import {
-    name as packageName,
-    version as packageVersion
-} from './package.json' assert {type: 'json'}
+
+/**Include dependencies */
+import packageInfo from './package.json'
 import React from 'react'
 
 
@@ -48,11 +48,14 @@ export const getLocal = () => {
         emitErrorLocalStorage()
         return false
     }
-    let localRaw = localStorage.getItem(packageName)
+    let localRaw = localStorage.getItem(packageInfo.name)
     let local = null
     if (localRaw) local = JSON.parse(localRaw, parseReviver)
     return !localRaw || !local? null : local
 }
+
+/**Remove the entire local save */
+export const removeLocal = () => localStorage.removeItem(packageInfo.name)
 
 /**Initialize preferences for this user */
 export const initializeLocalPreferences = (userId = defaultUserId) => {
@@ -63,10 +66,13 @@ export const initializeLocalPreferences = (userId = defaultUserId) => {
     }
     let local = getLocal()
     if (!local) {
-        localStorage.setItem(packageName, JSON.stringify(defaultLocalPreferences(userId)))
+        localStorage.setItem(packageInfo.name, JSON.stringify(defaultLocalPreferences(userId)))
         return true
     }
 }
+//
+/**Reset the entire local save */
+export const resetLocal = initializeLocalPreferences
 
 /**Retrieve all preferences */
 export const getLocalPreferences = (
@@ -113,11 +119,18 @@ export const setLocalPreference = (
     let prevPreferences = local.preferences
     let setPreferences = local.preferences
     let prevPreferenceIndex = prevPreferences.findIndex(pref => pref.code === code)
-    let setItem = { code: code, value: value }
+    let setItem = {
+        code,
+        value,
+        time: newTime()
+    }
     if (prevPreferenceIndex > -1) setPreferences[prevPreferenceIndex] = setItem
     else setPreferences.push(setItem)
-    let setLocal = { ...local, preferences: setPreferences }
-    localStorage.setItem(packageName, JSON.stringify(setLocal))
+    let setLocal = {
+        ...local,
+        preferences: setPreferences
+    }
+    localStorage.setItem(packageInfo.name, JSON.stringify(setLocal))
     return true
 }
 
@@ -132,38 +145,32 @@ export const validateLocalPreferences = () => {
 }
 
 /**REMINDER: What does this do? */
-const defaultLocalPreferences = (userId = defaultUserId) => {
-    let time = new Date()
-    return {
-        meta: {
-            userId,
-            code: packageName+':metadata',
-            time: {
-                unix: time/1000,
-                iso: time.toISOString(),
-                string: time.toISOString()
-            },
-            version: packageVersion
-        },
-        preferences: [
-            // {
-            //     code: 'darkMode',
-            //     value: true
-            // }
-        ]
-    }
-}
+const defaultLocalPreferences = (userId = defaultUserId) => ({
+    meta: {
+        userId,
+        code: packageInfo.name+':user:metadata',
+        time: newTime(),
+        version: packageInfo.version
+    },
+    preferences: [
+        // {
+        //     code: 'darkMode',
+        //     value: true
+        //     time: {unix, iso, string}
+        // }
+    ]
+})
 
 /**This function consoles an error */
-const emitErrorLocalStorage = () => console.error(packageName+': Local Storage is not available.')
+const emitErrorLocalStorage = () => console.error(packageInfo.name+': Local Storage is not available.')
 
 /**Check the browser permissions and/or capability for localStorage */
 function isLocalStorageAvailable() {
     if (typeof localStorage !== undefined)
         try {
-            localStorage.setItem(packageName+':test', 'here')
-            if (localStorage.getItem(packageName+':test') === 'here') {
-                localStorage.removeItem(packageName+':test')
+            localStorage.setItem(packageInfo.name+':test', 'here')
+            if (localStorage.getItem(packageInfo.name+':test') === 'here') {
+                localStorage.removeItem(packageInfo.name+':test')
                 /* localStorage is enabled */
                 return true
             } else /* localStorage is disabled */
@@ -193,7 +200,30 @@ export const useUserPref = (options = {}) => {
 }
 
 
-/* Helper functions (1) */
+/* Helper functions (2) */
 //
 /**Check if a variable is an object with keys */
 const isObject = thisVariable => thisVariable instanceof Object && !Array.isArray(thisVariable)
+//
+//
+/**Supplemental for newTime() */
+const newTimeHumanReadable = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric'
+}
+//
+/**Create an object of current time in various formats */
+const newTime = () => {
+    let datetime = new Date()
+    return {
+        unix: datetime/1000,
+        iso: datetime.toISOString(),
+        string: datetime.toString(),
+        human: datetime.toLocaleString(undefined, newTimeHumanReadable)
+    }
+}
