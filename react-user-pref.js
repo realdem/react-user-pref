@@ -18,6 +18,8 @@
  * 2. Complete getLocalPreference
  * 4. Finish comments
  * 5. Fully test everything
+ * 6. Shorten "preference" function names to "pref"?
+ * 7. Finish "Steps to use" (above)
  */
 import {
     name as packageName,
