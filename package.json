@@ -19,7 +19,9 @@
         "url": "https://danmichael.pro"
     },
     "main": "react-user-pref.js",
-    "dependencies": {},
+    "dependencies": {
+        "react": "^18.2.0"
+    },
     "browserslist": {
         "production": [
             ">0.2%",
