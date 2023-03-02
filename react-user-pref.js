@@ -21,8 +21,8 @@
  * 5. Fully test everything
  */
 import {
-    version as packageVersion,
-    name as packageName
+    name as packageName,
+    version as packageVersion
 } from './package.json' assert {type: 'json'}
 import React from 'react'
 
