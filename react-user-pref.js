@@ -16,7 +16,6 @@
  * Remaining build tasks:
  * 1. validateLocalPreferences (?)
  * 2. Complete getLocalPreference
- * 3. Complete React hook useUserPref({code, userId})
  * 4. Finish comments
  * 5. Fully test everything
  */
