@@ -174,3 +174,24 @@ function isLocalStorageAvailable() {
     else /* localStorage is not available */
         return false
 }
+
+const useUserPrefDefaultOptions = {
+    userId: defaultUserId,
+    code: null
+}
+//
+/**A React hook for retrieving user preferences as state */
+export const useUserPref = (options = {}) => {
+    /**Populate parameters with provided options object */
+    let param = {...useUserPrefDefaultOptions, ...isObject(options)? options : {}}
+
+    /**Determine what to return */
+    let result = undefined
+    /**REMINDER: Finish here */
+}
+
+
+/* Helper functions (1) */
+//
+/**Check if a variable is an object with keys */
+const isObject = thisVariable => thisVariable instanceof Object && !Array.isArray(thisVariable)
