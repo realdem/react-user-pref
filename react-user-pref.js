@@ -16,13 +16,15 @@
  * Remaining build tasks:
  * 1. validateLocalPreferences (?)
  * 2. Complete getLocalPreference
- * 3. Finish comments
- * 4. Fully test everything
+ * 3. Create React hook useUserPref({code, userId})
+ * 4. Finish comments
+ * 5. Fully test everything
  */
 import {
     version as packageVersion,
     name as packageName
 } from './package.json' assert {type: 'json'}
+import React from 'react'
 
 
 /**Initialize defaults */
