@@ -1,4 +1,4 @@
 # react-user-pref
-Manage state of user preferences which can persist throughout refreshes and logout events.
+Easily provide user preferences in a browser that persists after page reloads and logout events via localStorage. This tool provides you with a simple set of functions to manage your user's key-value settings.
 
-See project board here: https://app.ora.pm/p/470654
+Project status can be seen [here](https://github.com/users/realdem/projects/6/)
